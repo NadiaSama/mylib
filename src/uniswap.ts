@@ -33,8 +33,7 @@ class ReserveResult {
       ret = `${this.token0}/${this.token1}`;
     }
 
-    ret.replace('WETH', 'ETH');
-    return ret;
+    return ret.replace('WETH', 'ETH');
   }
 }
 function getProvider(env: string | undefined): Provider {
