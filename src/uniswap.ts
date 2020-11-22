@@ -25,12 +25,16 @@ class ReserveResult {
     this.timestamp = timestamp;
   }
 
-  usdtSymbol(): string {
+  ccxtSymbol(): string {
+    var ret: string;
     if (this.token0 == 'USDT') {
-      return `${this.token1}/${this.token0}`;
+      ret = `${this.token1}/${this.token0}`;
     } else {
-      return `${this.token0}/${this.token1}`;
+      ret = `${this.token0}/${this.token1}`;
     }
+
+    ret.replace('WETH', 'ETH');
+    return ret;
   }
 }
 function getProvider(env: string | undefined): Provider {

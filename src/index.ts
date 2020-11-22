@@ -22,7 +22,7 @@ export async function init(proxy?: string) {
 export async function record(logger: winston.Logger) {
   const result = await contract.getReserveInfo();
 
-  const ticker = await binClient.fetchTicker(result.usdtSymbol());
+  const ticker = await binClient.fetchTicker(result.ccxtSymbol());
 
   logger.log({
     level: 'info',
