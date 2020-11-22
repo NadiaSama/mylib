@@ -22,17 +22,17 @@ export async function init(proxy?: string) {
 export async function record(logger: winston.Logger) {
   const result = await contract.getReserveInfo();
 
-  const ticker = await binClient.fetchTicker(result.ccxtSymbol());
+  const ticker = await binClient.fetchTicker(contract.ccxtSymbol());
 
   logger.log({
     level: 'info',
     message: 'record',
     token0: result.token0,
-    token0Amount: result.token0Amount.toString(),
+    token0Amount: result.token0Amount,
     token1: result.token1,
-    token1Amount: result.token1Amount.toString(),
-    t0t1: result.token0Amount.div(result.token1Amount).toNumber(),
-    t1t0: result.token1Amount.div(result.token0Amount).toNumber(),
+    token1Amount: result.token1Amount,
+    t0t1: result.token0Amount / result.token1Amount,
+    t1t0: result.token1Amount / result.token0Amount,
     blockTimestamp: result.timestamp,
     binancePrice: ticker.last,
     binanceTimestamp: ticker.timestamp,

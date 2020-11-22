@@ -4,38 +4,14 @@ import IUniswapFactory from '@uniswap/v2-core/build/IUniswapV2Factory.json';
 import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 import IERC20 from '@uniswap/v2-core/build/IERC20.json';
 
-class ReserveResult {
+interface ReserveResult {
   token0: string;
-  token0Amount: BigNumber;
+  token0Amount: number;
   token1: string;
-  token1Amount: BigNumber;
+  token1Amount: number;
   timestamp: number;
-
-  constructor(
-    token0: string,
-    token0Amount: BigNumber,
-    token1: string,
-    token1Amount: BigNumber,
-    timestamp: number
-  ) {
-    this.token0 = token0;
-    this.token0Amount = token0Amount;
-    this.token1 = token1;
-    this.token1Amount = token1Amount;
-    this.timestamp = timestamp;
-  }
-
-  ccxtSymbol(): string {
-    var ret: string;
-    if (this.token0 == 'USDT') {
-      ret = `${this.token1}/${this.token0}`;
-    } else {
-      ret = `${this.token0}/${this.token1}`;
-    }
-
-    return ret.replace('WETH', 'ETH');
-  }
 }
+
 function getProvider(env: string | undefined): Provider {
   if ('development' === env) {
     return new ethers.providers.JsonRpcProvider();
@@ -60,19 +36,46 @@ export class UniPairContract {
   readonly contract: ethers.Contract;
   readonly token0: string;
   readonly token1: string;
-  constructor(contract: ethers.Contract, token0: string, token1: string) {
+  readonly token0Dec: number;
+  readonly token1Dec: number;
+  constructor(
+    contract: ethers.Contract,
+    token0: string,
+    token1: string,
+    token0Dec: number,
+    token1Dec: number
+  ) {
     this.contract = contract;
     this.token0 = token0;
     this.token1 = token1;
+    this.token0Dec = token0Dec;
+    this.token1Dec = token1Dec;
   }
 
   getReserves(): Promise<[BigNumber, BigNumber, number]> {
     return this.contract.getReserves();
   }
 
+  ccxtSymbol(): string {
+    var ret: string;
+    if (this.token0 == 'USDT') {
+      ret = `${this.token1}/${this.token0}`;
+    } else {
+      ret = `${this.token0}/${this.token1}`;
+    }
+
+    return ret.replace('WETH', 'ETH');
+  }
+
   async getReserveInfo(): Promise<ReserveResult> {
     const [ta, tb, tt] = await this.getReserves();
-    return new ReserveResult(this.token0, ta, this.token1, tb, tt);
+    return {
+      token0: this.token0,
+      token0Amount: Number(ethers.utils.formatUnits(ta, this.token0Dec)),
+      token1: this.token1,
+      token1Amount: Number(ethers.utils.formatUnits(tb, this.token1Dec)),
+      timestamp: tt,
+    };
   }
 }
 
@@ -88,7 +91,9 @@ export async function getPairContract(
   const token1C = new ethers.Contract(token1Addr, IERC20.abi, provider);
   const token0 = await token0C.symbol();
   const token1 = await token1C.symbol();
+  const d0 = await token0C.decimals();
+  const d1 = await token1C.decimals();
 
-  return new UniPairContract(contract, token0, token1);
+  return new UniPairContract(contract, token0, token1, d0, d1);
   //return new ethers.Contract(addr, IUniswapV2Pair.abi, provider);
 }

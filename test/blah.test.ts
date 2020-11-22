@@ -1,7 +1,9 @@
-import { sum } from '../src';
+import { ethers } from 'ethers';
 
 describe('blah', () => {
   it('works', () => {
-    expect(sum(1, 1)).toEqual(2);
+    const val = ethers.BigNumber.from(12345679);
+    const v2 = ethers.utils.formatUnits(val, 3);
+    console.log(val, v2);
   });
 });
