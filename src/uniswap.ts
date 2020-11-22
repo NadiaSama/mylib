@@ -4,12 +4,34 @@ import IUniswapFactory from '@uniswap/v2-core/build/IUniswapV2Factory.json';
 import IUniswapV2Pair from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 import IERC20 from '@uniswap/v2-core/build/IERC20.json';
 
-interface ReserveResult {
+class ReserveResult {
   token0: string;
-  token0Amount: string;
+  token0Amount: BigNumber;
   token1: string;
-  token1Amount: string;
-  timestamp: string;
+  token1Amount: BigNumber;
+  timestamp: number;
+
+  constructor(
+    token0: string,
+    token0Amount: BigNumber,
+    token1: string,
+    token1Amount: BigNumber,
+    timestamp: number
+  ) {
+    this.token0 = token0;
+    this.token0Amount = token0Amount;
+    this.token1 = token1;
+    this.token1Amount = token1Amount;
+    this.timestamp = timestamp;
+  }
+
+  usdtSymbol(): string {
+    if (this.token0 == 'USDT') {
+      return `${this.token1}/${this.token0}`;
+    } else {
+      return `${this.token0}/${this.token1}`;
+    }
+  }
 }
 function getProvider(env: string | undefined): Provider {
   if ('development' === env) {
@@ -41,19 +63,13 @@ export class UniPairContract {
     this.token1 = token1;
   }
 
-  getReserves(): Promise<[BigNumber, BigNumber, BigNumber]> {
+  getReserves(): Promise<[BigNumber, BigNumber, number]> {
     return this.contract.getReserves();
   }
 
   async getReserveInfo(): Promise<ReserveResult> {
     const [ta, tb, tt] = await this.getReserves();
-    return {
-      token0: this.token0,
-      token0Amount: ta.toString(),
-      token1: this.token1,
-      token1Amount: tb.toString(),
-      timestamp: tt.toString(),
-    };
+    return new ReserveResult(this.token0, ta, this.token1, tb, tt);
   }
 }
 
