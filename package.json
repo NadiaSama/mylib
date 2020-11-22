@@ -22,7 +22,6 @@
   "peerDependencies": {},
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
     }
   },
   "prettier": {
@@ -45,7 +44,7 @@
     }
   ],
   "devDependencies": {
-    "@ethersproject/providers": "^5.0.14",
+    "@ethersproject/providers": "^5.0.15",
     "@size-limit/preset-small-lib": "^4.7.0",
     "husky": "^4.3.0",
     "size-limit": "^4.7.0",
@@ -55,6 +54,6 @@
   },
   "dependencies": {
     "@uniswap/v2-core": "^1.0.1",
-    "ethers": "^5.0.19"
+    "ethers": "^5.0.21"
   }
 }
