@@ -25,12 +25,13 @@ function getProvider(env: string | undefined): Provider {
 
 const provider = getProvider('');
 
-function newFactory(provider: Provider): ethers.Contract {
-  const faddr: string = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
-  return new ethers.Contract(faddr, IUniswapFactory.abi, provider);
-}
+export const uniFactory: string = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
+export const sushiFactory: string =
+  '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac';
 
-const factory = newFactory(provider);
+export function newFactory(fAddr: string): ethers.Contract {
+  return new ethers.Contract(fAddr, IUniswapFactory.abi, provider);
+}
 
 export class UniPairContract {
   readonly contract: ethers.Contract;
@@ -80,6 +81,7 @@ export class UniPairContract {
 }
 
 export async function getPairContract(
+  factory: ethers.Contract,
   addrA: string,
   addrB: string
 ): Promise<UniPairContract> {
