@@ -33,11 +33,7 @@ export async function record(logger: winston.Logger) {
   const result = await uniContract.getReserveInfo();
   const sr = await sushiContract.getReserveInfo();
 
-  //const ticker = await binClient.fetchTicker(uniContract.ccxtSymbol());
-  const ticker = {
-    last: 1,
-    timestamp: 1,
-  };
+  const ticker = await binClient.fetchTicker(uniContract.ccxtSymbol());
 
   logger.log({
     level: 'info',

@@ -22,9 +22,14 @@ const logger = winston.createLogger({
 });
 
 async function main() {
-  logger.info('start loop');
   await dist.init();
-  await dist.record(record);
+  setInterval(async () => {
+    await dist.record(record);
+  }, 5000);
 }
+main();
 
-r = main();
+process.on('SIGINT', signal => {
+  console.log(`receive ${signal}`);
+  process.exit(0);
+});
