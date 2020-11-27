@@ -3,6 +3,7 @@ import {
   UniPairContract,
   newFactory,
   uniFactory,
+  sushiFactory,
 } from './uniswap';
 import { binance } from 'ccxt';
 import winston from 'winston';
@@ -14,11 +15,12 @@ var binClient: binance;
 export async function init(proxy?: string) {
   if (true) {
     const uf = newFactory(uniFactory);
+    const sf = newFactory(sushiFactory);
     const usdt = '0xdac17f958d2ee523a2206206994597c13d831ec7';
     const weth = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
     uniContract = await getPairContract(uf, usdt, weth);
-    sushiContract = await getPairContract(uf, usdt, weth);
+    sushiContract = await getPairContract(sf, usdt, weth);
     if (!proxy) {
       proxy = '';
     }
