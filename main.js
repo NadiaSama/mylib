@@ -2,6 +2,7 @@ const dist = require('./dist');
 const winston = require('winston');
 const { OnMaintenance } = require('ccxt');
 const { sleep } = require('ccxt/js/base/functions/time');
+const { exceptions } = require('winston');
 
 const record = winston.createLogger({
   level: 'info',
@@ -24,7 +25,11 @@ const logger = winston.createLogger({
 async function main() {
   await dist.init();
   setInterval(async () => {
-    await dist.record(record);
+    try {
+      await dist.record(record);
+    } catch (e) {
+      logger.info(`exception occure ${e}`);
+    }
   }, 5000);
 }
 main();
