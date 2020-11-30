@@ -49,7 +49,8 @@ export async function record(logger: winston.Logger) {
     sushiT0T1: sr.token0Amount / sr.token1Amount,
     sushiT1T0: sr.token1Amount / sr.token0Amount,
 
-    blockTimestamp: result.timestamp,
+    uniTimestamp: result.timestamp,
+    sushiTimestamp: sr.timestamp,
     binancePrice: ticker.last,
     binanceTimestamp: ticker.timestamp,
   });
