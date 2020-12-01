@@ -6,7 +6,12 @@ const { exceptions } = require('winston');
 
 const record = winston.createLogger({
   level: 'info',
-  format: winston.format.json(),
+  format: winston.format.combine(
+    winston.format.timestamp({
+      format: 'YYYY-MM-DD HH:mm:ss',
+    }),
+    winston.format.json()
+  ),
   transports: [new winston.transports.File({ filename: 'record.log' })],
 });
 
