@@ -3,37 +3,26 @@ import {
   UniPairContract,
   newFactory,
   uniFactory,
-  sushiFactory,
 } from './uniswap';
-import { binance } from 'ccxt';
 import winston from 'winston';
 
-var uniContract: UniPairContract;
-var sushiContract: UniPairContract;
-var binClient: binance;
+var aethEthContract: UniPairContract;
 
 export async function init(proxy?: string) {
   if (true) {
     const uf = newFactory(uniFactory);
-    const sf = newFactory(sushiFactory);
-    const usdt = '0xdac17f958d2ee523a2206206994597c13d831ec7';
     const weth = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+    const aeth = '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb';
 
-    uniContract = await getPairContract(uf, usdt, weth);
-    sushiContract = await getPairContract(sf, usdt, weth);
+    aethEthContract = await getPairContract(uf, weth, aeth);
     if (!proxy) {
       proxy = '';
     }
-    binClient = new binance({ proxy: proxy });
-    await binClient.loadMarkets();
   }
 }
 
 export async function record(logger: winston.Logger) {
-  const result = await uniContract.getReserveInfo();
-  const sr = await sushiContract.getReserveInfo();
-
-  const ticker = await binClient.fetchTicker(uniContract.ccxtSymbol());
+  const result = await aethEthContract.getReserveInfo();
 
   logger.log({
     level: 'info',
@@ -44,14 +33,6 @@ export async function record(logger: winston.Logger) {
     uniToken1Amount: result.token1Amount,
     uniT0T1: result.token0Amount / result.token1Amount,
     uniT1T0: result.token1Amount / result.token0Amount,
-    sushiToken0Amount: sr.token0Amount,
-    sushiToken1Amount: sr.token1Amount,
-    sushiT0T1: sr.token0Amount / sr.token1Amount,
-    sushiT1T0: sr.token1Amount / sr.token0Amount,
-
     uniTimestamp: result.timestamp,
-    sushiTimestamp: sr.timestamp,
-    binancePrice: ticker.last,
-    binanceTimestamp: ticker.timestamp,
   });
 }
