@@ -3,6 +3,7 @@ package memmysql
 import (
 	"fmt"
 	"net"
+	"net/url"
 
 	sqle "github.com/dolthub/go-mysql-server"
 	"github.com/dolthub/go-mysql-server/memory"
@@ -12,13 +13,24 @@ import (
 	"github.com/pkg/errors"
 )
 
+type (
+	// Config return by Run method. used to connect go-mysql-server
+	Config struct {
+		Host   string
+		Port   int
+		User   string
+		Passwd string
+		DB     string
+	}
+)
+
 var (
 	srv *server.Server
 )
 
 // Run start a go-mysql-server instance in background and return
-// the dsn which used to connect to the server
-func Run(dsn *string) error {
+// corresponding config which used to connect to the server
+func Run() (*Config, error) {
 	dbName := "test"
 	db := memory.NewDatabase(dbName)
 	engine := sqle.NewDefault(sql.NewDatabaseProvider(
@@ -28,7 +40,7 @@ func Run(dsn *string) error {
 
 	port, err := getFreePort()
 	if err != nil {
-		return errors.WithMessage(err, "get free port fail")
+		return nil, errors.WithMessage(err, "get free port fail")
 	}
 
 	config := server.Config{
@@ -38,14 +50,36 @@ func Run(dsn *string) error {
 
 	s, err := server.NewDefaultServer(config, engine)
 	if err != nil {
-		return errors.WithMessage(err, "create server fail")
+		return nil, errors.WithMessage(err, "create server fail")
 	}
 
-	addr := fmt.Sprintf("root@tcp(localhost:%d)/%s?parseTime=true&loc=Asia%%2FShanghai", port, dbName)
-	*dsn = addr
 	srv = s
 	go s.Start()
-	return nil
+	return &Config{
+		Host:   "localhost",
+		Port:   port,
+		User:   "root",
+		Passwd: "",
+		DB:     dbName,
+	}, nil
+}
+
+// DSN build data source name according config property and params if specfic
+func (c *Config) DSN(params url.Values) string {
+	var (
+		ret string
+	)
+
+	if len(c.Passwd) == 0 {
+		ret = fmt.Sprintf("%s@tcp(%s:%d)/%s", c.User, c.Host, c.Port, c.DB)
+	} else {
+		ret = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", c.User, c.Passwd, c.Host, c.Port, c.DB)
+	}
+
+	if len(params) != 0 {
+		ret = fmt.Sprintf("%s?%s", ret, params.Encode())
+	}
+	return ret
 }
 
 // Close stop background server instance
